@@ -21,20 +21,26 @@
 // SOFTWARE.
 
 import Foundation
-struct RssItem: Parsable {
-  typealias BuilderType = RssItemBuilder
 
-  static func builder() -> RssItemBuilder {
-    return RssItemBuilder()
+class ItemCollection<ItemType>: ItemCollectionBuilder {
+  var items = [ItemType]()
+  var error: Error?
+
+  func send(_ item: ItemType) {
+    items.append(item)
   }
 
-  static let path = ["rss", "channel", "item"]
+  func send(error: Error) {
+    self.error = error
+  }
+}
 
-  let title: String
-  let episode: Int
-  let guid: UUID
-  let link: URL
-  let description: String
-  let pubDate: Date
-  let enclosure: RssItemEnclosure
+extension ItemCollection {
+  var result: Result<[ItemType], Error> {
+    if let error = error {
+      return .failure(error)
+    } else {
+      return .success(items)
+    }
+  }
 }
