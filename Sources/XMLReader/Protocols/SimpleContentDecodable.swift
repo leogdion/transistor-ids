@@ -20,42 +20,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-@testable import RssReader
-import XCTest
+import Foundation
+protocol SimpleContentDecodable: ElementDecodable {
+  static func transform(fromContent content: String) -> Self?
+}
 
-final class RssReaderTests: XCTestCase {
-  func testAsyncXMLParser() {
-    // This is an example of a functional test case.
-    // Use XCTAssert and related functions to verify your tests produce the correct
-    // results.
-    let currentExp = expectation(description: "parsing finished")
-    let url = URL(string: "https://feeds.transistor.fm/empowerapps-show")!
-    var result: Result<[RssItem], Error>?
-    let parser = AsyncXMLParser<RssItem>(contentOf: url) { actualResult in
-      result = actualResult
-      currentExp.fulfill()
+extension SimpleContentDecodable {
+  static func transform(fromContent content: String?, withAttributes _: [String: String]) throws -> Self {
+    guard let result = content.flatMap({
+      self.transform(fromContent: $0)
+    }) else {
+      throw ContentDecodingError.invalidValue
     }
-    XCTAssertNotNil(parser)
-    waitForExpectations(timeout: 1000) { error in
-      XCTAssertNil(error)
-      let items: [RssItem]
-      do {
-        let actualResult = try XCTUnwrap(result)
-        items = try actualResult.get()
-      } catch {
-        XCTAssertNil(error)
-        return
-      }
-
-      XCTAssertGreaterThanOrEqual(items.count, 20)
-      XCTAssertLessThan(items.count, 100)
-    }
+    return result
   }
+}
 
-  func testPublisher() {}
+extension Int: SimpleContentDecodable {
+  static func transform(fromContent content: String) -> Int? {
+    return Int(content)
+  }
+}
 
-  static var allTests = [
-    ("testAsyncXMLParser", testAsyncXMLParser),
-    ("testPublisher", testPublisher)
-  ]
+extension UUID: SimpleContentDecodable {
+  static func transform(fromContent content: String) -> UUID? {
+    UUID(uuidString: content)
+  }
+}
+
+extension URL: SimpleContentDecodable {
+  static func transform(fromContent content: String) -> URL? {
+    return URL(string: content)
+  }
+}
+
+extension Date: SimpleContentDecodable {
+  static func transform(fromContent content: String) -> Date? {
+    return RssDateFormatter.formatter.date(from: content)
+  }
 }

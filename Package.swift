@@ -4,11 +4,11 @@
 import PackageDescription
 
 let package = Package(
-    name: "RssReader",
+    name: "XMLReader",
     products: [
         .library(
-            name: "RssReader",
-            targets: ["RssReader"])
+            name: "XMLReader",
+            targets: ["XMLReader"])
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -16,10 +16,10 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "RssReader",
+            name: "XMLReader",
             dependencies: []),
         .testTarget(
-            name: "RssReaderTests",
-            dependencies: ["RssReader"])
+            name: "XMLReaderTests",
+            dependencies: ["XMLReader"])
     ]
 )

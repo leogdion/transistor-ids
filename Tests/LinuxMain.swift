@@ -20,9 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import Foundation
-extension Date: SimpleContentDecodable {
-  static func transform(fromContent content: String) -> Date? {
-    return RssDateFormatter.formatter.date(from: content)
-  }
-}
+import XCTest
+
+import XMLReaderTests
+
+var tests = [XCTestCaseEntry]()
+tests += XMLReaderTests.allTests()
+XCTMain(tests)
