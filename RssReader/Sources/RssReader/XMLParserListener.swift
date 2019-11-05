@@ -31,11 +31,7 @@ class XMLParserListener
   var itemCollectionBuilder: ItemCollectionType
   var textContent: String?
   var attributes: [String: String]?
-  var currentPath: [String]? {
-    didSet {
-      debugPrint(self.currentPath ?? "")
-    }
-  }
+  var currentPath: [String]?
 
   weak var delegate: DelegateType?
 
