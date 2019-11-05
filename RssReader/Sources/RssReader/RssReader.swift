@@ -1,5 +1,31 @@
 import Cocoa
 
+
+protocol XMLParsingListenerDelegate : AnyObject {
+  func parsingCompleted(_ listener: XMLParsingListener)
+}
+class AsyncXMLParser : XMLParsingListenerDelegate {
+  func parsingCompleted(_ listener: XMLParsingListener) {
+    completed(listener.result)
+  }
+  
+  let parser : XMLParser
+  let listener = XMLParserListener()
+  let completed : ((Result<[RssItem], Error>) -> Void)
+  
+  init?(contentOf url: URL, completed: @escaping ((Result<[RssItem], Error>) -> Void)) {
+    guard let parser = XMLParser(contentsOf: url) else {
+      return nil
+    }
+    self.completed = completed
+    self.parser = parser
+    self.parser.delegate = self.listener
+    self.listener.delegate = self
+    self.parser.parse()
+  }
+  
+}
+
 enum RssParserError : Error {
   case missingFieldName(String)
   case invalidEndTag(String)
@@ -139,8 +165,10 @@ class RssItemBuilder {
   }
 }
 
-
-class XMLParserListener : NSObject, XMLParserDelegate {
+protocol XMLParsingListener {
+  var result : Result<[RssItem], Error> { get }
+}
+class XMLParserListener : NSObject, XMLParserDelegate, XMLParsingListener {
   var currentItem : RssItemBuilder?
   var items = [RssItem]()
   var error : Error?
@@ -148,7 +176,15 @@ class XMLParserListener : NSObject, XMLParserDelegate {
   var attributes : [String:String]?
   var currentPath : [String]? {
     didSet {
-      debugPrint(self.currentPath)
+      debugPrint(self.currentPath ?? "")
+    }
+  }
+  weak var delegate : XMLParsingListenerDelegate?
+  var result : Result<[RssItem], Error>{
+    if let error = error {
+      return .failure(error)
+    } else {
+      return .success(self.items)
     }
   }
   func parserDidStartDocument(_ parser: XMLParser) {
@@ -157,6 +193,7 @@ class XMLParserListener : NSObject, XMLParserDelegate {
   
   func parserDidEndDocument(_ parser: XMLParser) {
     self.currentPath = nil
+    self.delegate?.parsingCompleted(self)
   }
   
   func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String] = [:]) {
@@ -205,7 +242,7 @@ class XMLParserListener : NSObject, XMLParserDelegate {
       }
     }
     
-    self.currentPath?.popLast()
+    _ = self.currentPath?.popLast()
     self.attributes = nil
     self.textContent = nil
   }
@@ -214,10 +251,4 @@ class XMLParserListener : NSObject, XMLParserDelegate {
     return try Result.transform(fromContent: content, withAttributes: attributes)
   }
 }
-let listener = XMLParserListener()
-let parser = XMLParser(contentsOf: url)!
 
-parser.delegate = listener
-parser.parse()
-listener.items
-listener.error
