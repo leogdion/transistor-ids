@@ -14,7 +14,7 @@ final class RssReaderTests: XCTestCase {
         result = actualResult
         currentExp.fulfill()
       }
-      
+      XCTAssertNotNil(parser)
       waitForExpectations(timeout: 1000) { (error) in
         XCTAssertNil(error)
         let items : [RssItem]
