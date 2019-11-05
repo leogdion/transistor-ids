@@ -1,7 +1,8 @@
 import Foundation
-class XMLParserListener: NSObject, XMLParserDelegate, XMLParsingListener {
-  var currentItem: RssItemBuilder?
-  var items = [RssItem]()
+
+class XMLParserListener<ItemType, BuilderType: Builder, DelegateType: XMLParsingListenerDelegate>: NSObject, XMLParserDelegate, XMLParsingListenerProtocol where BuilderType.ItemType == ItemType, DelegateType.ItemType == ItemType, ItemType.BuilderType == BuilderType {
+  var currentItem: BuilderType?
+  var items = [ItemType]()
   var error: Error?
   var textContent: String?
   var attributes: [String: String]?
@@ -11,8 +12,8 @@ class XMLParserListener: NSObject, XMLParserDelegate, XMLParsingListener {
     }
   }
 
-  weak var delegate: XMLParsingListenerDelegate?
-  var result: Result<[RssItem], Error> {
+  weak var delegate: DelegateType?
+  var result: Result<[ItemType], Error> {
     if let error = error {
       return .failure(error)
     } else {
@@ -33,8 +34,8 @@ class XMLParserListener: NSObject, XMLParserDelegate, XMLParsingListener {
     print(elementName)
     currentPath?.append(elementName)
     attributes = attributeDict
-    if currentPath == ["rss", "channel", "item"] {
-      currentItem = RssItemBuilder()
+    if currentPath == ItemType.path {
+      currentItem = ItemType.builder()
       return
     }
   }
@@ -44,7 +45,7 @@ class XMLParserListener: NSObject, XMLParserDelegate, XMLParsingListener {
   }
 
   func parser(_: XMLParser, didEndElement elementName: String, namespaceURI _: String?, qualifiedName _: String?) {
-    if elementName == "item", currentPath == ["rss", "channel", "item"] {
+    if elementName == ItemType.path.last, currentPath == ItemType.path {
       // self.items = self.currentItem.item
       guard let builder = self.currentItem else {
         error = RssParserError.invalidEndTag(elementName)
@@ -57,15 +58,10 @@ class XMLParserListener: NSObject, XMLParserDelegate, XMLParsingListener {
         return
       }
     } else if let currentPath = self.currentPath, let builder = self.currentItem, let attributes = self.attributes {
-      if currentPath.starts(with: ["rss", "channel", "item"]), currentPath.count == 4 {
+      if currentPath.starts(with: ItemType.path), currentPath.count == 4 {
         do {
-          if elementName == "title" { builder.title = try transform(fromContent: textContent, withAttributes: attributes) }
-          if elementName == "itunes:episode" { builder.episode = try transform(fromContent: textContent, withAttributes: attributes) }
-          if elementName == "guid" { builder.guid = try transform(fromContent: textContent, withAttributes: attributes) }
-          if elementName == "link" { builder.link = try transform(fromContent: textContent, withAttributes: attributes) }
-          if elementName == "description" { builder.description = try transform(fromContent: textContent, withAttributes: attributes) }
-          if elementName == "pubDate" { builder.pubDate = try transform(fromContent: textContent, withAttributes: attributes) }
-          if elementName == "enclosure" { builder.enclosure = try transform(fromContent: textContent, withAttributes: attributes) }
+          try builder.set(key: elementName, fromContent: textContent, withAttributes: attributes)
+
         } catch {
           self.error = RssParserError.invalidContentForElementName(elementName, error)
         }
@@ -75,9 +71,5 @@ class XMLParserListener: NSObject, XMLParserDelegate, XMLParsingListener {
     _ = currentPath?.popLast()
     attributes = nil
     textContent = nil
-  }
-
-  func transform<Result>(fromContent content: String?, withAttributes attributes: [String: String]) throws -> Result where Result: ElementDecodable {
-    return try Result.transform(fromContent: content, withAttributes: attributes)
   }
 }

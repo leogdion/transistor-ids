@@ -9,7 +9,7 @@ final class RssReaderTests: XCTestCase {
       let currentExp = expectation(description: "parsing finished")
       let url = URL(string: "https://feeds.transistor.fm/empowerapps-show")!
       var result: Result<[RssItem], Error>?
-      let parser = AsyncXMLParser(contentOf: url) { (actualResult) in
+      let parser = AsyncXMLParser<RssItem, RssItemBuilder>(contentOf: url) { (actualResult) in
         result = actualResult
         currentExp.fulfill()
       }

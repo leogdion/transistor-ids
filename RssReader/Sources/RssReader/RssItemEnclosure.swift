@@ -1,4 +1,9 @@
 import Foundation
+struct RssItemEnclosure {
+  let url: URL
+  let length: Int
+}
+
 extension RssItemEnclosure: ElementDecodable {
   static func transform(fromContent _: String?, withAttributes attributes: [String: String]) throws -> RssItemEnclosure {
     guard let length = attributes["length"].flatMap({

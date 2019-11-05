@@ -7,9 +7,13 @@
 
 import Foundation
 
-let dateFormatter: DateFormatter = {
-  let formatter = DateFormatter()
-  formatter.locale = Locale(identifier: "en_US_POSIX")
-  formatter.dateFormat = "E, d MMM yyyy HH:mm:ss Z"
-  return formatter
-}()
+struct RssDateFormatter {
+  static let formatter: DateFormatter = {
+    let formatter = DateFormatter()
+    formatter.locale = Locale(identifier: "en_US_POSIX")
+    formatter.dateFormat = "E, d MMM yyyy HH:mm:ss Z"
+    return formatter
+  }()
+
+  private init() {}
+}
