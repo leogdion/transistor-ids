@@ -5,7 +5,10 @@ struct RssItemEnclosure {
 }
 
 extension RssItemEnclosure: ElementDecodable {
-  static func transform(fromContent _: String?, withAttributes attributes: [String: String]) throws -> RssItemEnclosure {
+  static func transform(
+    fromContent _: String?,
+    withAttributes attributes: [String: String]
+  ) throws -> RssItemEnclosure {
     guard let length = attributes["length"].flatMap({
       Int($0)
     }) else {

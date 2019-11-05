@@ -1,6 +1,8 @@
 import Foundation
 
-class XMLParserListener<ItemType, BuilderType: Builder, DelegateType: XMLParsingListenerDelegate>: NSObject, XMLParserDelegate, XMLParsingListenerProtocol where BuilderType.ItemType == ItemType, DelegateType.ItemType == ItemType, ItemType.BuilderType == BuilderType {
+class XMLParserListener<ItemType: Parsable, DelegateType: XMLParsingListenerDelegate>: NSObject, XMLParserDelegate, XMLParsingListenerProtocol
+  where DelegateType.ItemType == ItemType {
+  typealias BuilderType = ItemType.BuilderType
   var currentItem: BuilderType?
   var items = [ItemType]()
   var error: Error?
@@ -30,7 +32,13 @@ class XMLParserListener<ItemType, BuilderType: Builder, DelegateType: XMLParsing
     delegate?.parsingCompleted(self)
   }
 
-  func parser(_: XMLParser, didStartElement elementName: String, namespaceURI _: String?, qualifiedName _: String?, attributes attributeDict: [String: String] = [:]) {
+  func parser(
+    _: XMLParser,
+    didStartElement elementName: String,
+    namespaceURI _: String?,
+    qualifiedName _: String?,
+    attributes attributeDict: [String: String] = [:]
+  ) {
     print(elementName)
     currentPath?.append(elementName)
     attributes = attributeDict

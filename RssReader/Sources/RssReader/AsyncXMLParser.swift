@@ -1,12 +1,13 @@
 import Foundation
 
-class AsyncXMLParser<ItemType, BuilderType: Builder>: XMLParsingListenerDelegate where BuilderType.ItemType == ItemType, ItemType.BuilderType == BuilderType {
-  func parsingCompleted<ListenerType: XMLParsingListenerProtocol>(_ listener: ListenerType) where ListenerType.ItemType == ItemType {
+class AsyncXMLParser<ItemType: Parsable>: XMLParsingListenerDelegate {
+  func parsingCompleted<ListenerType: XMLParsingListenerProtocol>(_ listener: ListenerType)
+    where ListenerType.ItemType == ItemType {
     completed(listener.result)
   }
 
   let parser: XMLParser
-  let listener = XMLParserListener<ItemType, BuilderType, AsyncXMLParser>()
+  let listener = XMLParserListener<ItemType, AsyncXMLParser>()
   let completed: (Result<[ItemType], Error>) -> Void
 
   init?(contentOf url: URL, completed: @escaping ((Result<[ItemType], Error>) -> Void)) {

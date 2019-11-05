@@ -7,7 +7,7 @@
 
 import Foundation
 protocol Parsable {
-  associatedtype BuilderType: Builder
+  associatedtype BuilderType: Builder where BuilderType.ItemType == Self
   static func builder() -> BuilderType
   static var path: [String] { get }
 }
