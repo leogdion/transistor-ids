@@ -1,4 +1,3 @@
-
 protocol XMLParsingListener {
-  var result : Result<[RssItem], Error> { get }
+  var result: Result<[RssItem], Error> { get }
 }

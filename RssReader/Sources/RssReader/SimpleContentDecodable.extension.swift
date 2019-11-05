@@ -1,6 +1,5 @@
-
 extension SimpleContentDecodable {
-  static func transform(fromContent content: String?, withAttributes attributes: [String : String]) throws -> Self {
+  static func transform(fromContent content: String?, withAttributes _: [String: String]) throws -> Self {
     guard let result = content.flatMap({
       self.transform(fromContent: $0)
     }) else {

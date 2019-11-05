@@ -1,6 +1,5 @@
-
-extension String :  ElementDecodable {
-  static func transform(fromContent content: String?, withAttributes attributes: [String : String]) throws -> String {
+extension String: ElementDecodable {
+  static func transform(fromContent content: String?, withAttributes _: [String: String]) throws -> String {
     guard let content = content else {
       throw ContentDecodingError.missingValue
     }
