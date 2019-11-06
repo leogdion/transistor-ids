@@ -22,7 +22,7 @@
 
 import Foundation
 
-class AsyncXMLParser<ItemType: Parsable>: XMLParsingListenerDelegate {
+public class AsyncXMLParser<ItemType: Parsable>: XMLParsingListenerDelegate {
   typealias ItemCollectionType = ItemCollection<ItemType>
   typealias ParserType = AsyncXMLParser<ItemType>
   typealias ListenerType = XMLParserListener<ItemType, ParserType, ItemCollectionType>
@@ -30,7 +30,7 @@ class AsyncXMLParser<ItemType: Parsable>: XMLParsingListenerDelegate {
     return itemsListener.0
   }
 
-  func parsingCompleted<ListenerType: XMLParsingListenerProtocol>(_: ListenerType)
+  public func parsingCompleted<ListenerType: XMLParsingListenerProtocol>(_: ListenerType)
     where ListenerType.ItemType == ItemType {
     itemCollection.finish()
     completed(itemCollection.result!)
@@ -49,7 +49,7 @@ class AsyncXMLParser<ItemType: Parsable>: XMLParsingListenerDelegate {
 
   let completed: (Result<[ItemType], Error>) -> Void
 
-  init?(contentOf url: URL, completed: @escaping ((Result<[ItemType], Error>) -> Void)) {
+  public init?(contentOf url: URL, for type: ItemType.Type, completed: @escaping ((Result<[ItemType], Error>) -> Void)) {
     guard let parser = XMLParser(contentsOf: url) else {
       return nil
     }

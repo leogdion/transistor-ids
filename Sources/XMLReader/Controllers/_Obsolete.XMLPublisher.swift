@@ -24,24 +24,46 @@ import Combine
 import Foundation
 
 @available(OSX 10.15, *)
-class XMLPublisher<ItemType>: ItemCollectionBuilder {
-  let subject = PassthroughSubject<ItemType, Error>()
-
-  func send(_ item: ItemType) {
-    subject.send(item)
+public class XMLPublisher<ItemType>: ItemCollectionBuilder {
+  let subject: CurrentValueSubject<[ItemType], Error>
+  var items: [ItemType] {
+    didSet {
+      debugPrint("item count sent", items.count)
+      subject.send(items)
+    }
   }
 
-  func send(error: Error) {
+  init() {
+    let items = [ItemType]()
+    subject = CurrentValueSubject(items)
+    self.items = items
+  }
+
+  public func send(_ item: ItemType) {
+    debugPrint("recieved item")
+    items.append(item)
+  }
+
+  public func send(error: Error) {
     subject.send(completion: .failure(error))
   }
 
-  func finish() {
+  public func finish() {
     subject.send(completion: .finished)
   }
 }
 
 @available(OSX 10.15, *)
-class XMLPublishingParser<ItemType: Parsable>: XMLParsingListenerDelegate {
+public class XMLPublishingParser<ItemType: Parsable>: XMLParsingListenerDelegate, Publisher {
+  public func receive<S>(subscriber: S) where S: Subscriber, XMLPublishingParser.Failure == S.Failure, XMLPublishingParser.Output == S.Input {
+    publishingSubject.subject.receive(subscriber: subscriber)
+    // self.publisher.receive(subscriber: subscriber)
+  }
+
+  public typealias Output = [ItemType]
+
+  public typealias Failure = Error
+
   typealias XMLPublisherType = XMLPublisher<ItemType>
   typealias ParserType = XMLPublishingParser<ItemType>
   typealias ListenerType = XMLParserListener<ItemType, ParserType, XMLPublisherType>
@@ -49,7 +71,7 @@ class XMLPublishingParser<ItemType: Parsable>: XMLParsingListenerDelegate {
     return itemsListener.0
   }
 
-  func parsingCompleted<ListenerType: XMLParsingListenerProtocol>(_: ListenerType)
+  public func parsingCompleted<ListenerType: XMLParsingListenerProtocol>(_: ListenerType)
     where ListenerType.ItemType == ItemType {
     publishingSubject.finish()
   }
@@ -65,25 +87,37 @@ class XMLPublishingParser<ItemType: Parsable>: XMLParsingListenerDelegate {
     return (xmlpublisher, listener)
   }()
 
-  init?(contentsOf url: URL) {
+  public init?(contentsOf url: URL) {
     guard let parser = XMLParser(contentsOf: url) else {
       return nil
     }
-    // self.completed = completed
     self.parser = parser
-    self.parser.delegate = listener
+    parser.delegate = listener
     listener.delegate = self
-    // self.parser.parse()
-  }
-
-  func begin() {
-    parser.parse()
-  }
-}
-
-@available(OSX 10.15, *)
-extension XMLPublishingParser {
-  func publisher() -> AnyPublisher<ItemType, Error> {
-    return publishingSubject.subject.eraseToAnyPublisher()
+    defer {
+      self.parser.parse()
+    }
+//    let dataTaskPublisher = URLSession.shared.dataTaskPublisher(for: url)
+//    dataTaskPublisher.combineLatest(self.publishingSubject.subject).map
+//    let itemsPublisher = dataTaskPublisher.mapError({
+//      return $0 as Error
+//    }).flatMap { (dataResult) -> AnyPublisher<[ItemType], Error> in
+//      let parser = XMLParser(data: dataResult.data)
+//      parser.delegate = self.listener
+//      self.parser = parser
+//      self.listener.delegate = self
+//
+//      defer{
+//        parser.parse()
+//      }
+//
+//      return self.publishingSubject.subject.eraseToAnyPublisher()
+//    }.map({ (items) -> [ItemType] in
+//      debugPrint("recieved items:", items.count)
+//      debugPrint(items)
+//      return items
+//    }).eraseToAnyPublisher()
+//    self.publisher = itemsPublisher
+//
   }
 }

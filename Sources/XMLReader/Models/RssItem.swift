@@ -21,14 +21,14 @@
 // SOFTWARE.
 
 import Foundation
-struct RssItem: Parsable {
-  typealias BuilderType = RssItemBuilder
+public struct RssItem: Parsable {
+  public typealias BuilderType = RssItemBuilder
 
-  static func builder() -> RssItemBuilder {
+  public static func builder() -> RssItemBuilder {
     return RssItemBuilder()
   }
 
-  static let path = ["rss", "channel", "item"]
+  public static let path = ["rss", "channel", "item"]
 
   let title: String
   let episode: Int

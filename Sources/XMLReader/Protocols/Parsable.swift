@@ -21,7 +21,7 @@
 // SOFTWARE.
 
 import Foundation
-protocol Parsable {
+public protocol Parsable {
   associatedtype BuilderType: Builder where BuilderType.ItemType == Self
   static func builder() -> BuilderType
   static var path: [String] { get }

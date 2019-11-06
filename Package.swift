@@ -8,13 +8,19 @@ let package = Package(
     products: [
         .library(
             name: "XMLReader",
-            targets: ["XMLReader"])
+            targets: ["XMLReader"]),
+        .executable(
+                name: "XMLReaderCmd",
+                targets: ["XMLReaderCmd"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
     ],
     targets: [
+        .target(
+            name: "XMLReaderCmd",
+            dependencies: ["XMLReader"]),
         .target(
             name: "XMLReader",
             dependencies: []),

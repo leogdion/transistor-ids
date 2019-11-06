@@ -22,13 +22,13 @@
 
 import Foundation
 
-class XMLParserListener
+public class XMLParserListener
 <ItemType: Parsable, DelegateType: XMLParsingListenerDelegate, ItemCollectionType: ItemCollectionBuilder>:
   NSObject, XMLParserDelegate, XMLParsingListenerProtocol
   where DelegateType.ItemType == ItemType, ItemCollectionType.ItemType == ItemType {
   typealias BuilderType = ItemType.BuilderType
   var currentItem: BuilderType?
-  var itemCollectionBuilder: ItemCollectionType
+  public var itemCollectionBuilder: ItemCollectionType
   var textContent: String?
   var attributes: [String: String]?
   var currentPath: [String]?
@@ -39,16 +39,16 @@ class XMLParserListener
     self.itemCollectionBuilder = itemCollectionBuilder
   }
 
-  func parserDidStartDocument(_: XMLParser) {
+  public func parserDidStartDocument(_: XMLParser) {
     currentPath = [String]()
   }
 
-  func parserDidEndDocument(_: XMLParser) {
+  public func parserDidEndDocument(_: XMLParser) {
     currentPath = nil
     delegate?.parsingCompleted(self)
   }
 
-  func parser(
+  public func parser(
     _: XMLParser,
     didStartElement elementName: String,
     namespaceURI _: String?,
@@ -63,11 +63,11 @@ class XMLParserListener
     }
   }
 
-  func parser(_: XMLParser, foundCharacters string: String) {
+  public func parser(_: XMLParser, foundCharacters string: String) {
     textContent = string
   }
 
-  func parser(_: XMLParser, didEndElement elementName: String, namespaceURI _: String?, qualifiedName _: String?) {
+  public func parser(_: XMLParser, didEndElement elementName: String, namespaceURI _: String?, qualifiedName _: String?) {
     if elementName == ItemType.path.last, currentPath == ItemType.path {
       // self.items = self.currentItem.item
       guard let builder = self.currentItem else {

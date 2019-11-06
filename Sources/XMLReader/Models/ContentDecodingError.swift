@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-enum ContentDecodingError: Error {
+public enum ContentDecodingError: Error {
   case missingValue
   case invalidAttribute(String)
   case invalidValue

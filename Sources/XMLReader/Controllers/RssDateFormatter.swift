@@ -22,7 +22,7 @@
 
 import Foundation
 
-struct RssDateFormatter {
+public struct RssDateFormatter {
   static let formatter: DateFormatter = {
     let formatter = DateFormatter()
     formatter.locale = Locale(identifier: "en_US_POSIX")

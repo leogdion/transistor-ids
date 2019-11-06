@@ -22,7 +22,7 @@
 
 import Foundation
 
-protocol ItemCollectionBuilder {
+public protocol ItemCollectionBuilder {
   associatedtype ItemType
   func send(_ item: ItemType)
   func send(error: Error)

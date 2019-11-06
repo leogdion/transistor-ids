@@ -21,8 +21,8 @@
 // SOFTWARE.
 
 import Foundation
-class RssItemBuilder: Builder {
-  func set(key: String, fromContent textContent: String?, withAttributes attributes: [String: String]) throws {
+public class RssItemBuilder: Builder {
+  public func set(key: String, fromContent textContent: String?, withAttributes attributes: [String: String]) throws {
     if key == "title" {
       title = try RssItemBuilder.transform(
         fromContent: textContent,
@@ -75,7 +75,7 @@ class RssItemBuilder: Builder {
   var pubDate: Date?
   var enclosure: RssItemEnclosure?
 
-  func item() throws -> RssItem {
+  public func item() throws -> RssItem {
     guard let title = title else {
       throw XMLParserError.missingFieldName("title")
     }

@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-protocol XMLParsingListenerDelegate: AnyObject {
+public protocol XMLParsingListenerDelegate: AnyObject {
   associatedtype ItemType
   func parsingCompleted<ListenerType: XMLParsingListenerProtocol>(_ listener: ListenerType)
     where ListenerType.ItemType == ItemType

@@ -22,7 +22,7 @@
 
 import Foundation
 
-protocol Builder {
+public protocol Builder {
   associatedtype ItemType: Parsable
   func item() throws -> ItemType
   func set(key: String, fromContent textContent: String?, withAttributes attributes: [String: String]) throws

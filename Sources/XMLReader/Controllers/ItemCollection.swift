@@ -22,19 +22,19 @@
 
 import Foundation
 
-class ItemCollection<ItemType>: ItemCollectionBuilder {
+public class ItemCollection<ItemType>: ItemCollectionBuilder {
   var items = [ItemType]()
   var completed: Result<Void, Error>?
 
-  func send(_ item: ItemType) {
+  public func send(_ item: ItemType) {
     items.append(item)
   }
 
-  func send(error: Error) {
+  public func send(error: Error) {
     completed = .failure(error)
   }
 
-  func finish() {
+  public func finish() {
     completed = .success({}())
   }
 }

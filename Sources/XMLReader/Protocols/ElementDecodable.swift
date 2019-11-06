@@ -20,12 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-protocol ElementDecodable {
+public protocol ElementDecodable {
   static func transform(fromContent content: String?, withAttributes attributes: [String: String]) throws -> Self
 }
 
 extension String: ElementDecodable {
-  static func transform(fromContent content: String?, withAttributes _: [String: String]) throws -> String {
+  public static func transform(fromContent content: String?, withAttributes _: [String: String]) throws -> String {
     guard let content = content else {
       throw ContentDecodingError.missingValue
     }

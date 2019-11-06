@@ -22,7 +22,7 @@
 
 import Foundation
 
-enum XMLParserError: Error {
+public enum XMLParserError: Error {
   case missingFieldName(String)
   case invalidEndTag(String)
   case invalidContentForElementName(String, Error)

@@ -56,65 +56,72 @@ final class XMLReaderTests: XCTestCase {
   func testPublisher() {
     if #available(OSX 10.15, *) {
       let exp = expectation(description: "items received")
-      var count = 0
-      let parser = XMLPublishingParser<RssItem>(contentsOf: url)!
-      let publisher = parser.publisher()
-
-      let cancellable = publisher.sink(receiveCompletion: { completion in
-        switch completion {
-        case let .failure(error):
-          XCTFail(error.localizedDescription)
-        default: break
-        }
-        exp.fulfill()
-      }) { _ in
-        count += 1
-      }
-      parser.begin()
-      waitForExpectations(timeout: 10000) { error in
-        XCTAssertNil(error)
-
-        XCTAssertGreaterThanOrEqual(count, 20)
-        XCTAssertLessThan(count, 100)
-      }
-    } else {
-      // Fallback on earlier versions
-    }
-  }
-
-  func testPublisherCollection() {
-    if #available(OSX 10.15, *) {
-      let exp = expectation(description: "items received")
-      var count = 0
-      let parser = XMLPublishingParser<RssItem>(contentsOf: url)!
-      let publisher = parser.publisher().collect()
       var items: [RssItem]?
-
-      let cancellable = publisher.sink(receiveCompletion: { completion in
-        switch completion {
-        case let .failure(error):
-          XCTFail(error.localizedDescription)
-        default: break
-        }
+      let cancellable = XMLPublishingParser<RssItem>(contentsOf: url)!.catch { _ in
+        Empty<[RssItem], Never>()
+      }.sink { _items in
+        items = _items
         exp.fulfill()
-      }) { actualItems in
-        items = actualItems
       }
-      parser.begin()
+
+//      let cancellable = publisher.sink(receiveCompletion: { completion in
+//        switch completion {
+//        case let .failure(error):
+//          XCTFail(error.localizedDescription)
+//        default: break
+//        }
+//        exp.fulfill()
+//      }) { value in
+//        debugPrint(value)
+//        count += 1
+//      }
       waitForExpectations(timeout: 10000) { error in
         XCTAssertNil(error)
 
-        XCTAssertGreaterThanOrEqual(items!.count, 20)
-        XCTAssertLessThan(items!.count, 100)
+        guard let items = items else {
+          XCTFail()
+          return
+        }
+        XCTAssertGreaterThanOrEqual(items.count, 20)
+        XCTAssertLessThan(items.count, 100)
       }
     } else {
       // Fallback on earlier versions
     }
   }
+
+//  func testPublisherCollection() {
+//    if #available(OSX 10.15, *) {
+//      let exp = expectation(description: "items received")
+//      var count = 0
+//      let parser = XMLPublishingParser<RssItem>(contentsOf: url)!
+//      let publisher = parser.publisher().collect()
+//      var items: [RssItem]?
+//
+//      let cancellable = publisher.sink(receiveCompletion: { completion in
+//        switch completion {
+//        case let .failure(error):
+//          XCTFail(error.localizedDescription)
+//        default: break
+//        }
+//        exp.fulfill()
+//      }) { actualItems in
+//        items = actualItems
+//      }
+//      waitForExpectations(timeout: 10000) { error in
+//        XCTAssertNil(error)
+//
+//        XCTAssertGreaterThanOrEqual(items!.count, 20)
+//        XCTAssertLessThan(items!.count, 100)
+//      }
+//    } else {
+//      // Fallback on earlier versions
+//    }
+//  }
 
   static var allTests = [
     ("testAsyncXMLParser", testAsyncXMLParser),
     ("testPublisher", testPublisher),
-    ("testPublisherCollection", testPublisherCollection)
+    // ("testPublisherCollection", testPublisherCollection)
   ]
 }
