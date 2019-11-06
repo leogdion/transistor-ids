@@ -55,7 +55,6 @@ class XMLParserListener
     qualifiedName _: String?,
     attributes attributeDict: [String: String] = [:]
   ) {
-    print(elementName)
     currentPath?.append(elementName)
     attributes = attributeDict
     if currentPath == ItemType.path {
@@ -72,7 +71,7 @@ class XMLParserListener
     if elementName == ItemType.path.last, currentPath == ItemType.path {
       // self.items = self.currentItem.item
       guard let builder = self.currentItem else {
-        itemCollectionBuilder.send(error: RssParserError.invalidEndTag(elementName))
+        itemCollectionBuilder.send(error: XMLParserError.invalidEndTag(elementName))
         return
       }
       do {
@@ -87,7 +86,7 @@ class XMLParserListener
           try builder.set(key: elementName, fromContent: textContent, withAttributes: attributes)
 
         } catch {
-          itemCollectionBuilder.send(error: RssParserError.invalidContentForElementName(elementName, error))
+          itemCollectionBuilder.send(error: XMLParserError.invalidContentForElementName(elementName, error))
         }
       }
     }

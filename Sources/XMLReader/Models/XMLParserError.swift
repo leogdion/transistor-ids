@@ -20,8 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-enum RssParserError: Error {
+import Foundation
+
+enum XMLParserError: Error {
   case missingFieldName(String)
   case invalidEndTag(String)
   case invalidContentForElementName(String, Error)
+  case invalidContent(URL)
 }

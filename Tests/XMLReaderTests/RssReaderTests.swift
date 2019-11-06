@@ -22,14 +22,15 @@
 
 @testable import XMLReader
 import XCTest
+import Combine
 
 final class XMLReaderTests: XCTestCase {
+  let url = URL(string: "https://feeds.transistor.fm/empowerapps-show")!
   func testAsyncXMLParser() {
     // This is an example of a functional test case.
     // Use XCTAssert and related functions to verify your tests produce the correct
     // results.
     let currentExp = expectation(description: "parsing finished")
-    let url = URL(string: "https://feeds.transistor.fm/empowerapps-show")!
     var result: Result<[RssItem], Error>?
     let parser = AsyncXMLParser<RssItem>(contentOf: url) { actualResult in
       result = actualResult
@@ -52,10 +53,71 @@ final class XMLReaderTests: XCTestCase {
     }
   }
 
-  func testPublisher() {}
+  func testPublisher() {
+    if #available(OSX 10.15, *) {
+      let exp = expectation(description: "items received")
+      var count = 0
+      let parser = XMLPublishingParser<RssItem>(contentsOf: url)!
+      let publisher = parser.publisher()
+      
+
+      let cancellable = publisher.sink(receiveCompletion: { (completion) in
+        switch completion {
+        case .failure(let error):
+          XCTFail(error.localizedDescription)
+        default: break
+        }
+        exp.fulfill()
+      }) { (item) in
+        count += 1
+      }
+      parser.begin()
+      waitForExpectations(timeout: 10000) { (error) in
+        XCTAssertNil(error)
+        
+        XCTAssertGreaterThanOrEqual(count, 20)
+        XCTAssertLessThan(count, 100)
+      }
+    } else {
+      // Fallback on earlier versions
+    }
+    
+  }
+  
+  func testPublisherCollection() {
+    if #available(OSX 10.15, *) {
+      let exp = expectation(description: "items received")
+      var count = 0
+      let parser = XMLPublishingParser<RssItem>(contentsOf: url)!
+      let publisher = parser.publisher().collect()
+      var items : [RssItem]?
+
+      let cancellable = publisher.sink(receiveCompletion: { (completion) in
+        switch completion {
+        case .failure(let error):
+          XCTFail(error.localizedDescription)
+        default: break
+        }
+        exp.fulfill()
+      }) { (actualItems) in
+        items = actualItems
+      }
+      parser.begin()
+      waitForExpectations(timeout: 10000) { (error) in
+        XCTAssertNil(error)
+        
+        XCTAssertGreaterThanOrEqual(items!.count, 20)
+        XCTAssertLessThan(items!.count, 100)
+      }
+    } else {
+      // Fallback on earlier versions
+    }
+    
+  }
 
   static var allTests = [
     ("testAsyncXMLParser", testAsyncXMLParser),
-    ("testPublisher", testPublisher)
+    ("testPublisher", testPublisher),
+    ("testPublisherCollection", testPublisherCollection)
   ]
 }

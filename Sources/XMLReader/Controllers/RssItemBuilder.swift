@@ -77,25 +77,25 @@ class RssItemBuilder: Builder {
 
   func item() throws -> RssItem {
     guard let title = title else {
-      throw RssParserError.missingFieldName("title")
+      throw XMLParserError.missingFieldName("title")
     }
     guard let episode = episode else {
-      throw RssParserError.missingFieldName("episode")
+      throw XMLParserError.missingFieldName("episode")
     }
     guard let guid = guid else {
-      throw RssParserError.missingFieldName("guid")
+      throw XMLParserError.missingFieldName("guid")
     }
     guard let link = link else {
-      throw RssParserError.missingFieldName("transistorId")
+      throw XMLParserError.missingFieldName("transistorId")
     }
     guard let description = description else {
-      throw RssParserError.missingFieldName("description")
+      throw XMLParserError.missingFieldName("description")
     }
     guard let pubDate = pubDate else {
-      throw RssParserError.missingFieldName("pubDate")
+      throw XMLParserError.missingFieldName("pubDate")
     }
     guard let enclosure = enclosure else {
-      throw RssParserError.missingFieldName("enclosure")
+      throw XMLParserError.missingFieldName("enclosure")
     }
     return RssItem(
       title: title,

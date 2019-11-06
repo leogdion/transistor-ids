@@ -21,19 +21,38 @@
 // SOFTWARE.
 
 import Foundation
+import Combine
 
-class AsyncXMLParser<ItemType: Parsable>: XMLParsingListenerDelegate {
-  typealias ItemCollectionType = ItemCollection<ItemType>
-  typealias ParserType = AsyncXMLParser<ItemType>
-  typealias ListenerType = XMLParserListener<ItemType, ParserType, ItemCollectionType>
-  var itemCollection: ItemCollectionType {
+@available(OSX 10.15, *)
+class XMLPublisher<ItemType> : ItemCollectionBuilder {
+  let subject = PassthroughSubject<ItemType, Error>()
+  
+  func send(_ item: ItemType) {
+    subject.send(item)
+  }
+  
+  func send(error: Error) {
+    subject.send(completion: .failure(error))
+  }
+  
+  func finish() {
+    subject.send(completion: .finished)
+  }
+}
+
+
+@available(OSX 10.15, *)
+class XMLPublishingParser<ItemType: Parsable>: XMLParsingListenerDelegate {
+  typealias XMLPublisherType = XMLPublisher<ItemType>
+  typealias ParserType = XMLPublishingParser<ItemType>
+  typealias ListenerType = XMLParserListener<ItemType, ParserType, XMLPublisherType>
+  var publishingSubject: XMLPublisherType {
     return itemsListener.0
   }
 
   func parsingCompleted<ListenerType: XMLParsingListenerProtocol>(_: ListenerType)
     where ListenerType.ItemType == ItemType {
-      itemCollection.finish()
-    completed(itemCollection.result!)
+      self.publishingSubject.finish()
   }
 
   let parser: XMLParser
@@ -41,22 +60,32 @@ class AsyncXMLParser<ItemType: Parsable>: XMLParsingListenerDelegate {
     return itemsListener.1
   }
 
-  let itemsListener = { () -> (ItemCollectionType, ListenerType) in
-    let itemCollection = ItemCollectionType()
-    let listener = ListenerType(itemCollectionBuilder: itemCollection)
-    return (itemCollection, listener)
+  let itemsListener = { () -> (XMLPublisherType, ListenerType) in
+    let xmlpublisher = XMLPublisherType()
+    let listener = ListenerType(itemCollectionBuilder: xmlpublisher)
+    return (xmlpublisher, listener)
   }()
 
-  let completed: (Result<[ItemType], Error>) -> Void
 
-  init?(contentOf url: URL, completed: @escaping ((Result<[ItemType], Error>) -> Void)) {
+  init?(contentsOf url: URL) {
     guard let parser = XMLParser(contentsOf: url) else {
       return nil
     }
-    self.completed = completed
+    //self.completed = completed
     self.parser = parser
     self.parser.delegate = listener
     listener.delegate = self
+    //self.parser.parse()
+  }
+  
+  func begin () {
     self.parser.parse()
+  }
+}
+@available(OSX 10.15, *)
+extension XMLPublishingParser {
+  func publisher() -> AnyPublisher<ItemType,Error> {
+
+    return self.publishingSubject.subject.eraseToAnyPublisher()
   }
 }

@@ -24,23 +24,25 @@ import Foundation
 
 class ItemCollection<ItemType>: ItemCollectionBuilder {
   var items = [ItemType]()
-  var error: Error?
+  var completed: Result<Void, Error>?
 
   func send(_ item: ItemType) {
     items.append(item)
   }
 
   func send(error: Error) {
-    self.error = error
+    self.completed = .failure(error)
+  }
+  
+  func finish() {
+    self.completed = .success({}())
   }
 }
 
 extension ItemCollection {
-  var result: Result<[ItemType], Error> {
-    if let error = error {
-      return .failure(error)
-    } else {
-      return .success(items)
+  var result: Result<[ItemType], Error>? {
+    return self.completed.map {
+      $0.map{ self.items }
     }
   }
 }
