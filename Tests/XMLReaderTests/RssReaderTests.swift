@@ -20,9 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-@testable import XMLReader
-import XCTest
 import Combine
+import XCTest
+@testable import XMLReader
 
 final class XMLReaderTests: XCTestCase {
   let url = URL(string: "https://feeds.transistor.fm/empowerapps-show")!
@@ -59,60 +59,57 @@ final class XMLReaderTests: XCTestCase {
       var count = 0
       let parser = XMLPublishingParser<RssItem>(contentsOf: url)!
       let publisher = parser.publisher()
-      
 
-      let cancellable = publisher.sink(receiveCompletion: { (completion) in
+      let cancellable = publisher.sink(receiveCompletion: { completion in
         switch completion {
-        case .failure(let error):
+        case let .failure(error):
           XCTFail(error.localizedDescription)
         default: break
         }
         exp.fulfill()
-      }) { (item) in
+      }) { _ in
         count += 1
       }
       parser.begin()
-      waitForExpectations(timeout: 10000) { (error) in
+      waitForExpectations(timeout: 10000) { error in
         XCTAssertNil(error)
-        
+
         XCTAssertGreaterThanOrEqual(count, 20)
         XCTAssertLessThan(count, 100)
       }
     } else {
       // Fallback on earlier versions
     }
-    
   }
-  
+
   func testPublisherCollection() {
     if #available(OSX 10.15, *) {
       let exp = expectation(description: "items received")
       var count = 0
       let parser = XMLPublishingParser<RssItem>(contentsOf: url)!
       let publisher = parser.publisher().collect()
-      var items : [RssItem]?
+      var items: [RssItem]?
 
-      let cancellable = publisher.sink(receiveCompletion: { (completion) in
+      let cancellable = publisher.sink(receiveCompletion: { completion in
         switch completion {
-        case .failure(let error):
+        case let .failure(error):
           XCTFail(error.localizedDescription)
         default: break
         }
         exp.fulfill()
-      }) { (actualItems) in
+      }) { actualItems in
         items = actualItems
       }
       parser.begin()
-      waitForExpectations(timeout: 10000) { (error) in
+      waitForExpectations(timeout: 10000) { error in
         XCTAssertNil(error)
-        
+
         XCTAssertGreaterThanOrEqual(items!.count, 20)
         XCTAssertLessThan(items!.count, 100)
       }
     } else {
       // Fallback on earlier versions
     }
-    
   }
 
   static var allTests = [

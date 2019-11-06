@@ -27,5 +27,4 @@ protocol ItemCollectionBuilder {
   func send(_ item: ItemType)
   func send(error: Error)
   func finish()
-  
 }

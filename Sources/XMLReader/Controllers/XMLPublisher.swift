@@ -20,26 +20,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import Foundation
 import Combine
+import Foundation
 
 @available(OSX 10.15, *)
-class XMLPublisher<ItemType> : ItemCollectionBuilder {
+class XMLPublisher<ItemType>: ItemCollectionBuilder {
   let subject = PassthroughSubject<ItemType, Error>()
-  
+
   func send(_ item: ItemType) {
     subject.send(item)
   }
-  
+
   func send(error: Error) {
     subject.send(completion: .failure(error))
   }
-  
+
   func finish() {
     subject.send(completion: .finished)
   }
 }
-
 
 @available(OSX 10.15, *)
 class XMLPublishingParser<ItemType: Parsable>: XMLParsingListenerDelegate {
@@ -52,7 +51,7 @@ class XMLPublishingParser<ItemType: Parsable>: XMLParsingListenerDelegate {
 
   func parsingCompleted<ListenerType: XMLParsingListenerProtocol>(_: ListenerType)
     where ListenerType.ItemType == ItemType {
-      self.publishingSubject.finish()
+    publishingSubject.finish()
   }
 
   let parser: XMLParser
@@ -66,26 +65,25 @@ class XMLPublishingParser<ItemType: Parsable>: XMLParsingListenerDelegate {
     return (xmlpublisher, listener)
   }()
 
-
   init?(contentsOf url: URL) {
     guard let parser = XMLParser(contentsOf: url) else {
       return nil
     }
-    //self.completed = completed
+    // self.completed = completed
     self.parser = parser
     self.parser.delegate = listener
     listener.delegate = self
-    //self.parser.parse()
+    // self.parser.parse()
   }
-  
-  func begin () {
-    self.parser.parse()
+
+  func begin() {
+    parser.parse()
   }
 }
+
 @available(OSX 10.15, *)
 extension XMLPublishingParser {
-  func publisher() -> AnyPublisher<ItemType,Error> {
-
-    return self.publishingSubject.subject.eraseToAnyPublisher()
+  func publisher() -> AnyPublisher<ItemType, Error> {
+    return publishingSubject.subject.eraseToAnyPublisher()
   }
 }

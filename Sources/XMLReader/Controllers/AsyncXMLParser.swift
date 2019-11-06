@@ -32,7 +32,7 @@ class AsyncXMLParser<ItemType: Parsable>: XMLParsingListenerDelegate {
 
   func parsingCompleted<ListenerType: XMLParsingListenerProtocol>(_: ListenerType)
     where ListenerType.ItemType == ItemType {
-      itemCollection.finish()
+    itemCollection.finish()
     completed(itemCollection.result!)
   }
 

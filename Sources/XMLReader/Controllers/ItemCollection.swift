@@ -31,18 +31,18 @@ class ItemCollection<ItemType>: ItemCollectionBuilder {
   }
 
   func send(error: Error) {
-    self.completed = .failure(error)
+    completed = .failure(error)
   }
-  
+
   func finish() {
-    self.completed = .success({}())
+    completed = .success({}())
   }
 }
 
 extension ItemCollection {
   var result: Result<[ItemType], Error>? {
-    return self.completed.map {
-      $0.map{ self.items }
+    return completed.map {
+      $0.map { self.items }
     }
   }
 }
