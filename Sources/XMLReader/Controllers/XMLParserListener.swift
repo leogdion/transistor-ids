@@ -23,7 +23,9 @@
 import Foundation
 
 public class XMLParserListener
-<ItemType: Parsable, DelegateType: XMLParsingListenerDelegate, ItemCollectionType: ItemCollectionBuilder>:
+<ItemType: Parsable,
+ DelegateType: XMLParsingListenerDelegate,
+ ItemCollectionType: ItemCollectionBuilder>:
   NSObject, XMLParserDelegate, XMLParsingListenerProtocol
   where DelegateType.ItemType == ItemType, ItemCollectionType.ItemType == ItemType {
   typealias BuilderType = ItemType.BuilderType
@@ -67,7 +69,12 @@ public class XMLParserListener
     textContent = string
   }
 
-  public func parser(_: XMLParser, didEndElement elementName: String, namespaceURI _: String?, qualifiedName _: String?) {
+  public func parser(
+    _: XMLParser,
+    didEndElement elementName: String,
+    namespaceURI _: String?,
+    qualifiedName _: String?
+  ) {
     if elementName == ItemType.path.last, currentPath == ItemType.path {
       // self.items = self.currentItem.item
       guard let builder = self.currentItem else {

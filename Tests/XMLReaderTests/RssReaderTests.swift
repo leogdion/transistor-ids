@@ -68,10 +68,10 @@ final class XMLReaderTests: XCTestCase {
         default: break
         }
         exp.fulfill()
-      }) { value in
+      }, receiveValue: { value in
         debugPrint(value)
         count += 1
-      }
+      })
       parser.parse()
       waitForExpectations(timeout: 10000) { error in
         XCTAssertNil(error)
@@ -115,7 +115,7 @@ final class XMLReaderTests: XCTestCase {
 
   static var allTests = [
     ("testAsyncXMLParser", testAsyncXMLParser),
-    ("testPublisher", testPublisher),
+    ("testPublisher", testPublisher)
     // ("testPublisherCollection", testPublisherCollection)
   ]
 }

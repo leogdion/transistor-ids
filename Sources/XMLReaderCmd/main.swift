@@ -27,16 +27,22 @@ import XMLReader
 if #available(OSX 10.15, *) {
   let url = URL(string: "https://feeds.transistor.fm/empowerapps-show")!
   // let parser = DynamicXMLParser(contentOf: url, for: RssItem.self)
-  let parser = PublishingXMLParser(contentOf: url, autostart: false, doesFinish: true, for: RssItem.self)
+  let parser = PublishingXMLParser(
+    contentOf: url,
+    autostart: false,
+    doesFinish: true,
+    for: RssItem.self
+  )
   let publisher = parser.publisher()
 
 //  let subject = PassthroughSubject<[RssItem], Error>()
   _ = publisher.sink(receiveCompletion: {
     print($0)
     exit(0)
-  }) {
+  }, receiveValue: {
     print($0.count)
-  }
+  })
+
   parser.parse()
 
   RunLoop.current.run()
