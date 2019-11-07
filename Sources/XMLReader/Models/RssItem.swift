@@ -21,6 +21,22 @@
 // SOFTWARE.
 
 import Foundation
+
+enum Guid {
+  case uuid(UUID)
+  case url(URL)
+}
+
+extension Guid : SimpleContentDecodable {
+  static func transform(fromContent content: String) -> Guid? {
+    if let uuid = UUID(uuidString: content) {
+      return .uuid(uuid)
+    } else if let url = URL(string: content) {
+      return .url(url)
+    }
+    return nil
+  }
+}
 public struct RssItem: Parsable {
   public typealias BuilderType = RssItemBuilder
 
@@ -31,10 +47,10 @@ public struct RssItem: Parsable {
   public static let path = ["rss", "channel", "item"]
 
   let title: String
-  let episode: Int
-  let guid: UUID
+  let episode: Int?
+  let guid: Guid
   let link: URL
   let description: String
   let pubDate: Date
-  let enclosure: RssItemEnclosure
+  let enclosure: RssItemEnclosure?
 }

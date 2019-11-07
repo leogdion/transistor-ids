@@ -86,8 +86,7 @@ final class XMLReaderTests: XCTestCase {
 
   func testErrorPublisher() {
     if #available(OSX 10.15, *) {
-      var count = 0
-      let exp = expectation(description: "items received")
+      let exp = expectation(description: "items failed")
       let badUrl = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
       
       FileManager.default.createFile(atPath: badUrl.path, contents: nil, attributes: nil)
@@ -98,20 +97,17 @@ final class XMLReaderTests: XCTestCase {
       let cancellable = publisher.sink(receiveCompletion: { completion in
         switch completion {
         case let .failure(error):
-          XCTFail(error.localizedDescription)
+           exp.fulfill()
         default: break
         }
-        exp.fulfill()
+       
       }, receiveValue: { value in
-        debugPrint(value)
-        count += 1
+        
       })
       parser.parse()
       waitForExpectations(timeout: 10000) { error in
         XCTAssertNil(error)
 
-        XCTAssertGreaterThanOrEqual(count, 20)
-        XCTAssertLessThan(count, 100)
       }
     } else {
       // Fallback on earlier versions

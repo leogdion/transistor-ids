@@ -25,25 +25,28 @@ import Foundation
 import XMLReader
 
 if #available(OSX 10.15, *) {
-  let url = URL(string: "https://feeds.transistor.fm/empowerapps-show")!
+  
+  let url = URL(string: "https://lorem-rss.herokuapp.com/feed?unit=second")!
+  let publisher = Timer.publish(every: 1.0, tolerance: TimeInterval(1.0), on: .current, in: .default, options: nil).autoconnect().flatMap {(date) -> AnyPublisher<[RssItem], Never> in
+    let parser = PublishingXMLParser(contentOf: url, doesFinish: false, for: RssItem.self)
+    print(date)
+    let publisher = parser.publisher().catch {_ in
+      Empty<[RssItem], Never>()
+      }.eraseToAnyPublisher()
+    return publisher
+  }
   // let parser = DynamicXMLParser(contentOf: url, for: RssItem.self)
-  let parser = PublishingXMLParser(
-    contentOf: url,
-    autostart: false,
-    doesFinish: true,
-    for: RssItem.self
-  )
-  let publisher = parser.publisher()
 
-//  let subject = PassthroughSubject<[RssItem], Error>()
-  _ = publisher.sink(receiveCompletion: {
-    print($0)
-    exit(0)
-  }, receiveValue: {
-    print($0.count)
+
+  let cancellable = publisher.sink(receiveCompletion: { completion in
+    switch completion {
+    case let .failure(error): exit(1)
+    case .finished: exit(0)
+    default: break
+    }
+  }, receiveValue: { value in
+    debugPrint(value.count)
   })
-
-  parser.parse()
 
   RunLoop.current.run()
 } else {
