@@ -49,7 +49,7 @@ public class AsyncXMLParser<ItemType: Parsable>: XMLParsingListenerDelegate {
 
   let completed: (Result<[ItemType], Error>) -> Void
 
-  public init?(contentOf url: URL, for type: ItemType.Type, completed: @escaping ((Result<[ItemType], Error>) -> Void)) {
+  public init?(contentOf url: URL, for _: ItemType.Type, completed: @escaping ((Result<[ItemType], Error>) -> Void)) {
     guard let parser = XMLParser(contentsOf: url) else {
       return nil
     }

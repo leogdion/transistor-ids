@@ -32,7 +32,7 @@ final class XMLReaderTests: XCTestCase {
     // results.
     let currentExp = expectation(description: "parsing finished")
     var result: Result<[RssItem], Error>?
-    let parser = AsyncXMLParser<RssItem>(contentOf: url) { actualResult in
+    let parser = AsyncXMLParser(contentOf: url, for: RssItem.self) { actualResult in
       result = actualResult
       currentExp.fulfill()
     }
@@ -55,35 +55,29 @@ final class XMLReaderTests: XCTestCase {
 
   func testPublisher() {
     if #available(OSX 10.15, *) {
+      var count = 0
       let exp = expectation(description: "items received")
-      var items: [RssItem]?
-      let cancellable = XMLPublishingParser<RssItem>(contentsOf: url)!.catch { _ in
-        Empty<[RssItem], Never>()
-      }.sink { _items in
-        items = _items
-        exp.fulfill()
-      }
+      let parser = PublishingXMLParser(contentOf: url, autostart: false, doesFinish: true, for: RssItem.self)
 
-//      let cancellable = publisher.sink(receiveCompletion: { completion in
-//        switch completion {
-//        case let .failure(error):
-//          XCTFail(error.localizedDescription)
-//        default: break
-//        }
-//        exp.fulfill()
-//      }) { value in
-//        debugPrint(value)
-//        count += 1
-//      }
+      let publisher = parser.publisher()
+
+      parser.parse()
+      let cancellable = publisher.sink(receiveCompletion: { completion in
+        switch completion {
+        case let .failure(error):
+          XCTFail(error.localizedDescription)
+        default: break
+        }
+        exp.fulfill()
+      }) { value in
+        debugPrint(value)
+        count += 1
+      }
       waitForExpectations(timeout: 10000) { error in
         XCTAssertNil(error)
 
-        guard let items = items else {
-          XCTFail()
-          return
-        }
-        XCTAssertGreaterThanOrEqual(items.count, 20)
-        XCTAssertLessThan(items.count, 100)
+        XCTAssertGreaterThanOrEqual(count, 20)
+        XCTAssertLessThan(count, 100)
       }
     } else {
       // Fallback on earlier versions

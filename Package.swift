@@ -11,7 +11,7 @@ let package = Package(
             targets: ["XMLReader"]),
         .executable(
                 name: "XMLReaderCmd",
-                targets: ["XMLReaderCmd"]),
+                targets: ["XMLReaderCmd"])
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.

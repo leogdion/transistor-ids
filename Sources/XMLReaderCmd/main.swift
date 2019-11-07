@@ -24,33 +24,21 @@ import Combine
 import Foundation
 import XMLReader
 
-
-@available(OSX 10.15, *)
-extension PassthroughSubject {
-  func send(_ result : Result<Output, Failure>) {
-    switch result {
-    case .success(let output):
-      self.send(output)
-      self.send(completion: .finished)
-    case .failure(let error):
-      self.send(completion: .failure(error))
-    }
-  }
-}
 if #available(OSX 10.15, *) {
   let url = URL(string: "https://feeds.transistor.fm/empowerapps-show")!
-  let subject = PassthroughSubject<[RssItem], Error>()
-  let cancellable = subject.sink(receiveCompletion: {
+  // let parser = DynamicXMLParser(contentOf: url, for: RssItem.self)
+  let parser = PublishingXMLParser(contentOf: url, autostart: false, doesFinish: true, for: RssItem.self)
+  let publisher = parser.publisher()
+
+//  let subject = PassthroughSubject<[RssItem], Error>()
+  _ = publisher.sink(receiveCompletion: {
     print($0)
     exit(0)
   }) {
-    print($0)
+    print($0.count)
   }
-  let parser = AsyncXMLParser(contentOf: url, for: RssItem.self) { (result) in
-    print("result")
-    subject.send(result)
-  }
-  
+  parser.parse()
+
   RunLoop.current.run()
 } else {
   // Fallback on earlier versions
