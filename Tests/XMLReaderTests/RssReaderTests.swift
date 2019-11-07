@@ -84,6 +84,39 @@ final class XMLReaderTests: XCTestCase {
     }
   }
 
+  func testErrorPublisher() {
+    if #available(OSX 10.15, *) {
+      var count = 0
+      let exp = expectation(description: "items received")
+      let badUrl = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+      
+      FileManager.default.createFile(atPath: badUrl.path, contents: nil, attributes: nil)
+      let parser = PublishingXMLParser(contentOf: badUrl, autostart: false, doesFinish: true, for: RssItem.self)
+
+      let publisher = parser.publisher()
+
+      let cancellable = publisher.sink(receiveCompletion: { completion in
+        switch completion {
+        case let .failure(error):
+          XCTFail(error.localizedDescription)
+        default: break
+        }
+        exp.fulfill()
+      }, receiveValue: { value in
+        debugPrint(value)
+        count += 1
+      })
+      parser.parse()
+      waitForExpectations(timeout: 10000) { error in
+        XCTAssertNil(error)
+
+        XCTAssertGreaterThanOrEqual(count, 20)
+        XCTAssertLessThan(count, 100)
+      }
+    } else {
+      // Fallback on earlier versions
+    }
+  }
 //  func testPublisherCollection() {
 //    if #available(OSX 10.15, *) {
 //      let exp = expectation(description: "items received")
@@ -115,7 +148,8 @@ final class XMLReaderTests: XCTestCase {
 
   static var allTests = [
     ("testAsyncXMLParser", testAsyncXMLParser),
-    ("testPublisher", testPublisher)
+    ("testPublisher", testPublisher),
+    ("testErrorPublisher", testErrorPublisher)
     // ("testPublisherCollection", testPublisherCollection)
   ]
 }

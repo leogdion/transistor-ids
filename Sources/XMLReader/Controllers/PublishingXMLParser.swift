@@ -61,7 +61,7 @@ public class PublishingXMLParser<ItemType: Parsable>: XMLParsingListenerDelegate
   let parser: XMLParser?
   var listener: ListenerType?
 
-  public init(contentOf url: URL, autostart: Bool, doesFinish: Bool, for _: ItemType.Type) {
+  public init(contentOf url: URL, autostart: Bool = true, doesFinish: Bool = true, for _: ItemType.Type) {
     self.doesFinish = doesFinish
     self.url = url
     subject = CurrentValueSubject(items)
@@ -87,6 +87,9 @@ public class PublishingXMLParser<ItemType: Parsable>: XMLParsingListenerDelegate
       return
     }
     parser.parse()
+    if let error = parser.parserError {
+      self.send(error: error)
+    }
   }
 
   public func publisher() -> AnyPublisher<[ItemType], Error> {

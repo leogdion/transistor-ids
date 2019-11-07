@@ -64,6 +64,14 @@ public class XMLParserListener
       return
     }
   }
+  
+  public func parser(_ parser: XMLParser, parseErrorOccurred parseError: Error) {
+    itemCollectionBuilder.send(error: parseError)
+  }
+  
+  public func parser(_ parser: XMLParser, validationErrorOccurred validationError: Error) {
+    itemCollectionBuilder.send(error: validationError)
+  }
 
   public func parser(_: XMLParser, foundCharacters string: String) {
     textContent = string
