@@ -25,14 +25,15 @@ import XCTest
 @testable import XMLReader
 
 final class XMLReaderTests: XCTestCase {
-  let url = URL(string: "https://feeds.transistor.fm/empowerapps-show")!
+  let podcastURL = URL(string: "https://feeds.transistor.fm/empowerapps-show")!
+  let rssURL = URL(string: "https://lorem-rss.herokuapp.com/feed?unit=second")!
   func testAsyncXMLParser() {
     // This is an example of a functional test case.
     // Use XCTAssert and related functions to verify your tests produce the correct
     // results.
     let currentExp = expectation(description: "parsing finished")
     var result: Result<[RssItem], Error>?
-    let parser = AsyncXMLParser(contentOf: url, for: RssItem.self) { actualResult in
+    let parser = AsyncXMLParser(contentOf: rssURL, for: RssItem.self) { actualResult in
       result = actualResult
       currentExp.fulfill()
     }
@@ -48,16 +49,77 @@ final class XMLReaderTests: XCTestCase {
         return
       }
 
-      XCTAssertGreaterThanOrEqual(items.count, 20)
-      XCTAssertLessThan(items.count, 100)
+      XCTAssertEqual(items.count, 10)
     }
   }
 
-  func testPublisher() {
+  func testRssPublisher() {
     if #available(OSX 10.15, *) {
       var count = 0
       let exp = expectation(description: "items received")
-      let parser = PublishingXMLParser(contentOf: url, autostart: false, doesFinish: true, for: RssItem.self)
+      let parser = PublishingXMLParser(contentOf: rssURL, autostart: false, doesFinish: true, for: RssItem.self)
+
+      let publisher = parser.publisher()
+
+      let cancellable = publisher.sink(receiveCompletion: { completion in
+        switch completion {
+        case let .failure(error):
+          XCTFail(error.localizedDescription)
+        default: break
+        }
+        exp.fulfill()
+      }, receiveValue: { value in
+        debugPrint(value)
+        count += 1
+      })
+      parser.parse()
+      waitForExpectations(timeout: 10000) { error in
+        XCTAssertNil(error)
+
+        XCTAssertEqual(count, 11)
+      }
+    } else {
+      // Fallback on earlier versions
+    }
+  }
+  
+  func testBadPodcastPublisher() {
+    if #available(OSX 10.15, *) {
+      var count = 0
+      let exp = expectation(description: "items received")
+      let parser = PublishingXMLParser(contentOf: rssURL, autostart: false, doesFinish: true, for: PodcastRssItem.self)
+
+      let publisher = parser.publisher()
+
+      let cancellable = publisher.sink(receiveCompletion: { completion in
+        switch completion {
+        case let .failure(error):
+          if case let .missingFieldName(field) = error as? XMLParserError {
+            XCTAssertEqual(field, "episode")
+          exp.fulfill()
+          }
+          
+        default: break
+        }
+      }, receiveValue: { value in
+        debugPrint(value)
+        count += 1
+      })
+      parser.parse()
+      waitForExpectations(timeout: 10000) { error in
+        XCTAssertNil(error)
+
+      }
+    } else {
+      // Fallback on earlier versions
+    }
+  }
+  
+  func testPodcastPublisher() {
+    if #available(OSX 10.15, *) {
+      var count = 0
+      let exp = expectation(description: "items received")
+      let parser = PublishingXMLParser(contentOf: podcastURL, autostart: false, doesFinish: true, for: PodcastRssItem.self)
 
       let publisher = parser.publisher()
 
@@ -83,7 +145,6 @@ final class XMLReaderTests: XCTestCase {
       // Fallback on earlier versions
     }
   }
-
   func testErrorPublisher() {
     if #available(OSX 10.15, *) {
       let exp = expectation(description: "items failed")
@@ -144,7 +205,8 @@ final class XMLReaderTests: XCTestCase {
 
   static var allTests = [
     ("testAsyncXMLParser", testAsyncXMLParser),
-    ("testPublisher", testPublisher),
+    ("testRssPublisher", testRssPublisher),
+    ("testPodcastPublisher", testPodcastPublisher),
     ("testErrorPublisher", testErrorPublisher)
     // ("testPublisherCollection", testPublisherCollection)
   ]

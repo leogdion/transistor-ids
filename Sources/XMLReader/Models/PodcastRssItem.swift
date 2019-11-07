@@ -21,35 +21,21 @@
 // SOFTWARE.
 
 import Foundation
-public protocol SimpleContentDecodable: ElementDecodable {
-  static func transform(fromContent content: String) -> Self?
-}
 
-extension SimpleContentDecodable {
-  public static func transform(fromContent content: String?, withAttributes _: [String: String]) throws -> Self {
-    guard let result = content.flatMap({
-      self.transform(fromContent: $0)
-    }) else {
-      throw ContentDecodingError.invalidValue
-    }
-    return result
-  }
-}
+public struct PodcastRssItem: Parsable {
+  public typealias BuilderType = PodcastRssItemBuilder
 
-extension Int: SimpleContentDecodable {
-  public static func transform(fromContent content: String) -> Int? {
-    return Int(content)
+  public static func builder() -> PodcastRssItemBuilder {
+    return PodcastRssItemBuilder()
   }
-}
 
-extension URL: SimpleContentDecodable {
-  public static func transform(fromContent content: String) -> URL? {
-    return URL(string: content)
-  }
-}
+  public static let path = ["rss", "channel", "item"]
 
-extension Date: SimpleContentDecodable {
-  public static func transform(fromContent content: String) -> Date? {
-    return RssDateFormatter.formatter.date(from: content)
-  }
+  let title: String
+  let episode: Int
+  let guid: Guid
+  let link: URL
+  let description: String
+  let pubDate: Date
+  let enclosure: RssItemEnclosure
 }
