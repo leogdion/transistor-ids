@@ -21,42 +21,40 @@
 // SOFTWARE.
 
 import Foundation
-public class PodcastRssItemBuilder : AbstractRssItemBuilder, Builder {
- public func item() throws -> PodcastRssItem {
-      guard let title = title else {
-        throw XMLParserError.missingFieldName("title")
-      }
-      guard let episode = episode else {
-        throw XMLParserError.missingFieldName("episode")
-      }
-      guard let guid = guid else {
-        throw XMLParserError.missingFieldName("guid")
-      }
-      guard let link = link else {
-        throw XMLParserError.missingFieldName("link")
-      }
-      guard let description = description else {
-        throw XMLParserError.missingFieldName("description")
-      }
-      guard let pubDate = pubDate else {
-        throw XMLParserError.missingFieldName("pubDate")
-      }
-      guard let enclosure = enclosure else {
-        throw XMLParserError.missingFieldName("enclosure")
-      }
-      return PodcastRssItem(
-        title: title,
-        episode: episode,
-        guid: guid,
-        link: link,
-        description:
-        description,
-        pubDate: pubDate,
-        enclosure: enclosure
-      )
+public class PodcastRssItemBuilder: AbstractRssItemBuilder, Builder {
+  public func item() throws -> PodcastRssItem {
+    guard let title = title else {
+      throw XMLParserError.missingFieldName("title")
     }
-  
+    guard let episode = episode else {
+      throw XMLParserError.missingFieldName("episode")
+    }
+    guard let guid = guid else {
+      throw XMLParserError.missingFieldName("guid")
+    }
+    guard let link = link else {
+      throw XMLParserError.missingFieldName("link")
+    }
+    guard let description = description else {
+      throw XMLParserError.missingFieldName("description")
+    }
+    guard let pubDate = pubDate else {
+      throw XMLParserError.missingFieldName("pubDate")
+    }
+    guard let enclosure = enclosure else {
+      throw XMLParserError.missingFieldName("enclosure")
+    }
+    return PodcastRssItem(
+      title: title,
+      episode: episode,
+      guid: guid,
+      link: link,
+      description:
+      description,
+      pubDate: pubDate,
+      enclosure: enclosure
+    )
+  }
+
   public typealias ItemType = PodcastRssItem
-  
-  
 }

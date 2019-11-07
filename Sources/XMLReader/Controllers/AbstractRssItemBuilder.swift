@@ -75,7 +75,6 @@ public class AbstractRssItemBuilder {
   var pubDate: Date?
   var enclosure: RssItemEnclosure?
 
-
   static func transform<Result>(
     fromContent content: String?,
     withAttributes attributes: [String: String]
@@ -84,4 +83,3 @@ public class AbstractRssItemBuilder {
     return try Result.transform(fromContent: content, withAttributes: attributes)
   }
 }
-

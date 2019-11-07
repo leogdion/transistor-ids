@@ -88,7 +88,7 @@ public class PublishingXMLParser<ItemType: Parsable>: XMLParsingListenerDelegate
     }
     parser.parse()
     if let error = parser.parserError {
-      self.send(error: error)
+      send(error: error)
     }
   }
 

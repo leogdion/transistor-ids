@@ -25,18 +25,23 @@ import Foundation
 import XMLReader
 
 if #available(OSX 10.15, *) {
-  
   let url = URL(string: "https://lorem-rss.herokuapp.com/feed?unit=second")!
-  let publisher = Timer.publish(every: 1.0, tolerance: TimeInterval(1.0), on: .current, in: .default, options: nil).autoconnect().flatMap {(date) -> AnyPublisher<[RssItem], Never> in
+  let publisher = Timer.publish(
+    every: 1.0,
+    tolerance:
+    TimeInterval(1.0),
+    on: .current,
+    in: .default,
+    options: nil
+  ).autoconnect().flatMap { (date) -> AnyPublisher<[RssItem], Never> in
     let parser = PublishingXMLParser(contentOf: url, doesFinish: false, for: RssItem.self)
     print(date)
-    let publisher = parser.publisher().catch {_ in
+    let publisher = parser.publisher().catch { _ in
       Empty<[RssItem], Never>()
-      }.eraseToAnyPublisher()
+    }.eraseToAnyPublisher()
     return publisher
   }
   // let parser = DynamicXMLParser(contentOf: url, for: RssItem.self)
-
 
   let cancellable = publisher.sink(receiveCompletion: { completion in
     switch completion {

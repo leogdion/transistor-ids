@@ -82,7 +82,7 @@ final class XMLReaderTests: XCTestCase {
       // Fallback on earlier versions
     }
   }
-  
+
   func testBadPodcastPublisher() {
     if #available(OSX 10.15, *) {
       var count = 0
@@ -96,9 +96,9 @@ final class XMLReaderTests: XCTestCase {
         case let .failure(error):
           if case let .missingFieldName(field) = error as? XMLParserError {
             XCTAssertEqual(field, "episode")
-          exp.fulfill()
+            exp.fulfill()
           }
-          
+
         default: break
         }
       }, receiveValue: { value in
@@ -108,18 +108,22 @@ final class XMLReaderTests: XCTestCase {
       parser.parse()
       waitForExpectations(timeout: 10000) { error in
         XCTAssertNil(error)
-
       }
     } else {
       // Fallback on earlier versions
     }
   }
-  
+
   func testPodcastPublisher() {
     if #available(OSX 10.15, *) {
       var count = 0
       let exp = expectation(description: "items received")
-      let parser = PublishingXMLParser(contentOf: podcastURL, autostart: false, doesFinish: true, for: PodcastRssItem.self)
+      let parser = PublishingXMLParser(
+        contentOf: podcastURL,
+        autostart: false,
+        doesFinish: true,
+        for: PodcastRssItem.self
+      )
 
       let publisher = parser.publisher()
 
@@ -145,11 +149,12 @@ final class XMLReaderTests: XCTestCase {
       // Fallback on earlier versions
     }
   }
+
   func testErrorPublisher() {
     if #available(OSX 10.15, *) {
       let exp = expectation(description: "items failed")
       let badUrl = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-      
+
       FileManager.default.createFile(atPath: badUrl.path, contents: nil, attributes: nil)
       let parser = PublishingXMLParser(contentOf: badUrl, autostart: false, doesFinish: true, for: RssItem.self)
 
@@ -158,22 +163,22 @@ final class XMLReaderTests: XCTestCase {
       let cancellable = publisher.sink(receiveCompletion: { completion in
         switch completion {
         case let .failure(error):
-           exp.fulfill()
+          exp.fulfill()
         default: break
         }
-       
-      }, receiveValue: { value in
-        
+
+      }, receiveValue: { _ in
+
       })
       parser.parse()
       waitForExpectations(timeout: 10000) { error in
         XCTAssertNil(error)
-
       }
     } else {
       // Fallback on earlier versions
     }
   }
+
 //  func testPublisherCollection() {
 //    if #available(OSX 10.15, *) {
 //      let exp = expectation(description: "items received")
@@ -207,7 +212,7 @@ final class XMLReaderTests: XCTestCase {
     ("testAsyncXMLParser", testAsyncXMLParser),
     ("testRssPublisher", testRssPublisher),
     ("testPodcastPublisher", testPodcastPublisher),
-    ("testErrorPublisher", testErrorPublisher)
+    ("testErrorPublisher", testErrorPublisher),
     // ("testPublisherCollection", testPublisherCollection)
   ]
 }

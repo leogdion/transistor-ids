@@ -64,12 +64,12 @@ public class XMLParserListener
       return
     }
   }
-  
-  public func parser(_ parser: XMLParser, parseErrorOccurred parseError: Error) {
+
+  public func parser(_: XMLParser, parseErrorOccurred parseError: Error) {
     itemCollectionBuilder.send(error: parseError)
   }
-  
-  public func parser(_ parser: XMLParser, validationErrorOccurred validationError: Error) {
+
+  public func parser(_: XMLParser, validationErrorOccurred validationError: Error) {
     itemCollectionBuilder.send(error: validationError)
   }
 
