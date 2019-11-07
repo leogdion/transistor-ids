@@ -61,7 +61,6 @@ final class XMLReaderTests: XCTestCase {
 
       let publisher = parser.publisher()
 
-      parser.parse()
       let cancellable = publisher.sink(receiveCompletion: { completion in
         switch completion {
         case let .failure(error):
@@ -73,6 +72,7 @@ final class XMLReaderTests: XCTestCase {
         debugPrint(value)
         count += 1
       }
+      parser.parse()
       waitForExpectations(timeout: 10000) { error in
         XCTAssertNil(error)
 
